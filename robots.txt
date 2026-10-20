@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# After choosing your real domain, replace DOMAIN_NAME_REQUIRED in sitemap.xml.
+Sitemap: https://DOMAIN_NAME_REQUIRED/sitemap.xml
