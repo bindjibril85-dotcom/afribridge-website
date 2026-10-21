@@ -5,7 +5,9 @@ import pg from "pg";
 import { z } from "zod";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { Resend } from "resend";
 
+const resend = new Resend(process.env.RESEND_API_KEY);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const port = Number(process.env.PORT || 3000);
@@ -79,6 +81,20 @@ app.post("/api/enquiries", enquiryLimiter, async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, TRUE, 'new')`,
       [data.name, data.email.toLowerCase(), data.company || null, data.interest, data.message]
     );
+    try {
+  const { error } = await resend.emails.send({
+    from: "AfriBridge <onboarding@resend.dev>",
+    to: ["bindjibril85@gmail.com"],
+    subject: "New AfriBridge enquiry",
+text: "A new AfriBridge enquiry has been received.\n\nName: " + data.name + "\nEmail: " + data.email + "\nCompany: " + (data.company || "Not provided") + "\nInterest: " + data.interest + "\n\nMessage:\n" + data.message
+  });
+
+  if (error) {
+    console.error("Enquiry email failed:", error);
+  }
+} catch (emailError) {
+  console.error("Enquiry email failed:", emailError);
+}
     return res.status(201).json({ ok: true });
   } catch (error) {
     console.error("Enquiry storage failed:", error?.code || "database_error");
